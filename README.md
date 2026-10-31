@@ -2,9 +2,12 @@
 
 # WeltenWeber DM Tool
 
-**One screen to run your whole table.** Show scene art on a projector or second screen, play music and sound effects,
-fire a thunderclap at the perfect moment, switch scenes with one click and record the session, all from one window.
-Built for a sci-fi D&D campaign, works for any tabletop game. Windows app, free and open source (MIT).
+**One screen to run your whole table.** 
+A tool that allows you to have full control over your sessions music, sound fx, light scenes, concept art and much much more. Its based on a scene by scene system and allows you to quickly switch from one to the next with just one click. 
+
+I worked on it for several months testing it on my own homebrew DND campaign. It turned from a simple playlist manager to something way more robust so I hope sharing it helps at least one DM outthere to have a fun session. 
+
+The tool is free and open source, so enjoy and happy DM'ing.
 
 ![The WeltenWeber DM Tool main window](docs/images/main-window.png)
 

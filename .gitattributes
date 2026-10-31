@@ -1,2 +1,7 @@
-# Auto detect text files and perform LF normalization
 * text=auto
+*.ogg binary
+*.mp3 binary
+*.wav binary
+*.png binary
+*.jpg binary
+*.bat text eol=crlf
