@@ -1,0 +1,28 @@
+# machine-specific settings & logs (created next to main.py / the exe)
+director_config.json
+director_remote_command.json
+crash.log
+portable_backup_*/
+
+# python / build
+__pycache__/
+*.pyc
+.venv/
+venv/
+build/
+dist/
+vlc_bundle/
+*.spec
+
+# download/extract leftovers of tools/fetch_vlc.py (VLC is fetched at build time, never commit it)
+vlc.zip
+vlc_extract/
+
+# editors / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# temp files the app writes atomically
+*.tmp

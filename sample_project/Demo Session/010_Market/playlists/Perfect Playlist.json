@@ -1,0 +1,15 @@
+{
+  "name": "Perfect Playlist",
+  "version": 1,
+  "saved": "2026-10-31T11:01:42",
+  "tracks": [
+    {
+      "name": "nature_calm,_ambient02.m4a",
+      "path": "{MUSIC}/Ambient/nature_calm,_ambient02.m4a"
+    },
+    {
+      "name": "Fight_Driving.mp3",
+      "path": "{MUSIC}/Combat/Fight_Driving.mp3"
+    }
+  ]
+}

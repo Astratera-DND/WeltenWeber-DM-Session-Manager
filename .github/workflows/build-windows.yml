@@ -1,0 +1,95 @@
+name: Build portable Windows version
+
+on:
+  release:
+    types: [published]       # publish a Release on GitHub (any tag name) -> builds and attaches both zips to it
+  workflow_dispatch:         # or start it by hand: Actions tab -> Run workflow (zips then only appear under "Artifacts")
+    inputs:
+      onefile:
+        description: "Single .exe (untick for a folder build, which starts faster)"
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: python -m pip install -r requirements-dev.txt
+
+      - name: Download portable VLC (libvlc is bundled so users don't have to install VLC)
+        run: python tools/fetch_vlc.py
+
+      - name: Build exe with PyInstaller
+        shell: pwsh
+        run: |
+          # single exe by default (also for tag builds); only an explicit "false" gives the folder version
+          $mode = "--onefile"
+          if ("${{ inputs.onefile }}" -eq "false") { $mode = "--onedir" }
+          python -m PyInstaller --noconfirm --clean --noconsole $mode `
+            --name WeltenWeber-DM-Tool `
+            --icon assets/icon.ico `
+            --add-data "assets;assets" `
+            --add-data "vlc_bundle;vlc" `
+            --collect-all imageio_ffmpeg `
+            --hidden-import quickfire_engine `
+            main.py
+
+      # Download 1: the program only (exe + readme)
+      - name: Package the program (exe + readme)
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory release | Out-Null
+          if (Test-Path dist\WeltenWeber-DM-Tool) {
+            Copy-Item dist\WeltenWeber-DM-Tool release\WeltenWeber-DM-Tool -Recurse
+          } else {
+            Copy-Item dist\WeltenWeber-DM-Tool.exe release\
+          }
+          Copy-Item README.md release\README.md
+          Copy-Item LICENSE release\LICENSE.txt
+          Copy-Item THIRD_PARTY_NOTICES.md release\THIRD_PARTY_NOTICES.md
+          if (Test-Path vlc_extract\vlc-3.0.21\COPYING.txt) { Copy-Item vlc_extract\vlc-3.0.21\COPYING.txt release\VLC-COPYING.txt }
+          Compress-Archive -Path release\* -DestinationPath WeltenWeber-DM-Tool-win64.zip
+
+      # Download 2: the optional sample project + sample sound libraries, on their own
+      - name: Package the sample project (separate zip)
+        shell: pwsh
+        run: |
+          $items = @("sample_project", "sample_libraries") | Where-Object { Test-Path $_ }
+          if (@($items).Count -eq 0) {
+            Write-Host "::warning::Neither sample_project nor sample_libraries was found, so no sample zip was made."
+            exit 0
+          }
+          Compress-Archive -Path $items -DestinationPath WeltenWeber-DM-Tool-sample-project.zip
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: WeltenWeber-DM-Tool-win64
+          path: WeltenWeber-DM-Tool-win64.zip
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: WeltenWeber-DM-Tool-sample-project
+          path: WeltenWeber-DM-Tool-sample-project.zip
+          if-no-files-found: ignore
+
+      # Release builds: the zips are added to the release you just published.
+      # Your own release title and notes are left untouched.
+      - name: Attach both zips to the GitHub Release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.release.tag_name }}
+          files: |
+            WeltenWeber-DM-Tool-win64.zip
+            WeltenWeber-DM-Tool-sample-project.zip
